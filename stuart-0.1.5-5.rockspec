@@ -1,16 +1,16 @@
 -- This file was automatically generated for the LuaDist project.
 
 package = "stuart"
-version = "0.1.5-4"
+version = "0.1.5-5"
 -- LuaDist source
 source = {
-  tag = "0.1.5-4",
+  tag = "0.1.5-5",
   url = "git://github.com/LuaDist-testing/stuart.git"
 }
 -- Original source
 -- source = {
---    url = "https://github.com/BixData/stuart/archive/0.1.5-4.tar.gz",
---    dir = "stuart-0.1.5-4"
+--    url = "https://github.com/BixData/stuart/archive/0.1.5-5.tar.gz",
+--    dir = "stuart-0.1.5-5"
 -- }
 description = {
    summary = "An Apache Spark runtime for embedding and edge computing",
