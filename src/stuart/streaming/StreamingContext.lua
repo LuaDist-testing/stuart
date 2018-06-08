@@ -27,41 +27,46 @@ function StreamingContext:initialize(sc, batchDuration)
   self.state='initialized'
 end
 
+function StreamingContext:awaitTermination()
+  self:awaitTerminationOrTimeout(0)
+end
+
 function StreamingContext:awaitTerminationOrTimeout(timeout)
-  if not moses.isNumber(timeout) or timeout <= 0 then error('Invalid timeout') end
+  if not moses.isNumber(timeout) or timeout < 0 then error('Invalid timeout') end
   
   local coroutines = {}
-  for i,dstream in ipairs(self.dstreams) do
+  for _,dstream in ipairs(self.dstreams) do
     coroutines[#coroutines+1] = {coroutine.create(dstream.compute), dstream}
   end
   
   -- run loop
   local startTime = socket.gettime()
-  local loopDurationGoal = 0.05 -- 50ms
-  local individualDStreamDurationBudget = loopDurationGoal / #self.dstreams 
+  local loopDurationGoal = self.batchDuration
+  local individualDStreamDurationBudget = loopDurationGoal / #self.dstreams
   while self.state == 'active' do
   
     -- Decide whether to timeout
     local now = socket.gettime()
-    local elapsed = now - startTime
-    if elapsed > timeout then break end
-    local loopStartTime = now
+    if timeout > 0 then
+      local elapsed = now - startTime
+      if elapsed > timeout then break end
+    end
     
     -- Run each dstream compute() function, until it yields
-    for i,copair in ipairs(coroutines) do
+    for _,copair in ipairs(coroutines) do
       local co = copair[1]
       local dstream = copair[2]
       if coroutine.status(co) == 'suspended' then
-        local ok, rdds = coroutine.resume(co, dstream, individualDStreamDurationBudget) --, now, individualDStreamDurationBudget)
+        local ok, rdds = coroutine.resume(co, dstream, individualDStreamDurationBudget)
         if ok and (rdds ~= nil) and (#rdds > 0) then
-          for i, rdd in ipairs(rdds) do dstream:_notify(now, rdd) end
+          for _, rdd in ipairs(rdds) do dstream:_notify(now, rdd) end
         end
       end
     end
     
     sleep(loopDurationGoal)
   end
-  --moses.print('Ending run loop')
+  --print('Ending run loop')
 end
 
 function StreamingContext:getState()
@@ -70,11 +75,11 @@ end
 
 function StreamingContext:queueStream(rdds, oneAtATime)
   if not moses.isBoolean(oneAtATime) then oneAtATime = true end
-  rdds = moses.map(rdds, function(i,rdd)
+  rdds = moses.map(rdds, function(_,rdd)
     if not isInstanceOf(rdd, RDD) then rdd = self.sc:makeRDD(rdd) end
     return rdd
   end)
-  local dstream = QueueInputDStream:new(self, rdds)
+  local dstream = QueueInputDStream:new(self, rdds, oneAtATime)
   self.dstreams[#self.dstreams+1] = dstream
   return dstream
 end
@@ -93,14 +98,14 @@ end
 
 function StreamingContext:start()
   if self.state == 'stopped' then error('StreamingContext has already been stopped') end
-  for i, dstream in ipairs(self.dstreams) do
+  for _, dstream in ipairs(self.dstreams) do
     dstream:start()
   end
   self.state = 'active'
 end
 
 function StreamingContext:stop()
-  for i, dstream in ipairs(self.dstreams) do
+  for _, dstream in ipairs(self.dstreams) do
     dstream:stop()
   end
   self.state = 'stopped'

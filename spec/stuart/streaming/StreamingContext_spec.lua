@@ -1,4 +1,4 @@
-local _ = require 'lodash'
+local moses = require 'moses'
 local registerAsserts = require 'registerAsserts'
 local socket = require 'socket'
 local stuart = require 'stuart'
@@ -10,14 +10,14 @@ describe('StreamingContext', function()
   local sc = stuart.NewContext()
 
   it('can create multiple independent StreamingContext objects', function()
-    local ssc1 = stuart.StreamingContext:new(sc)
+    local ssc1 = stuart.NewStreamingContext(sc)
     assert.equals(0, #ssc1.dstreams)
-    ssc1:queueStream({sc:makeRDD(_.range(3))})
+    ssc1:queueStream({sc:makeRDD(moses.range(1,3))})
     assert.equals(1, #ssc1.dstreams)
 
-    local ssc2 = stuart.StreamingContext:new(sc)
+    local ssc2 = stuart.NewStreamingContext(sc)
     assert.equals(0, #ssc2.dstreams)
-    ssc2:queueStream({sc:makeRDD(_.range(4,6))})
+    ssc2:queueStream({sc:makeRDD(moses.range(4,6))})
     assert.equals(1, #ssc2.dstreams)
   end)
   
@@ -33,20 +33,19 @@ describe('StreamingContext', function()
   end)
   
   it('can queue RDDs into a DStream', function()
-    local timeoutSecs = .3
+    local ssc = stuart.NewStreamingContext(sc, 0.1)
     local rdd1 = sc:parallelize({'a', 'b'})
     local rdd2 = sc:parallelize({'c'})
     local rdds = {rdd1, rdd2}
-    local ssc = stuart.NewStreamingContext(sc)
     local dstream = ssc:queueStream(rdds)
     
     local r = {}
     dstream:foreachRDD(function(rdd)
-      _.forEach(rdd:collect(), function(e) table.insert(r, e) end)
+      moses.forEach(rdd:collect(), function(i,e) table.insert(r, e) end)
     end)
     
     ssc:start()
-    ssc:awaitTerminationOrTimeout(timeoutSecs)
+    ssc:awaitTerminationOrTimeout(0.3)
     assert.contains(r, 'a')
     assert.contains(r, 'b')
     assert.contains(r, 'c')
@@ -55,16 +54,16 @@ describe('StreamingContext', function()
   it('count()', function()
     local ssc = stuart.NewStreamingContext(sc, 0.1)
     local result = {}
-    local dstream = ssc:queueStream({sc:makeRDD(_.range(10)), sc:makeRDD({20,21})})
+    local dstream = ssc:queueStream({sc:makeRDD(moses.range(1,10)), sc:makeRDD({20,21})})
     dstream = dstream:count()
     dstream:foreachRDD(function(rdd)
-      _.forEach(rdd:collect(), function(e) result[#result+1] = e end)
+      moses.forEach(rdd:collect(), function(i,e) result[#result+1] = e end)
     end)
 
     ssc:start()
     ssc:awaitTerminationOrTimeout(0.25)
     
-    local count = _.reduce(result, function(r,e) return r+e end, 0)
+    local count = moses.reduce(result, function(r,e) return r+e end, 0)
     assert.equals(12, count)
   end)
   

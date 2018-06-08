@@ -3,10 +3,10 @@ local moses = require 'moses'
 local Context = require 'stuart.Context'
 local StreamingContext = require 'stuart.streaming.StreamingContext'
 
-Stuart = {}
+local Stuart = {}
 
-Stuart.NewContext = function()
-  return Context:new()
+Stuart.NewContext = function(master, appName)
+  return Context:new(master, appName)
 end
 
 Stuart.NewStreamingContext = function(arg1, arg2, arg3)
@@ -15,7 +15,7 @@ Stuart.NewStreamingContext = function(arg1, arg2, arg3)
     return StreamingContext:new(sc, arg3)
   end
   if moses.isString(arg1) and moses.isNumber(arg2) and arg3 == nil then
-    local sc = Stuart.Context:new(arg1)
+    local sc = Context:new(arg1)
     return StreamingContext:new(sc, arg2)
   end
   

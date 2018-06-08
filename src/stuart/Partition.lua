@@ -21,11 +21,11 @@ function Partition:_flattenValues()
   self.data = moses.reduce(self.data, function(r, e)
     local x = e[2]
     if moses.isString(x) then
-      t = {}
+      local t = {}
       x:gsub('.', function(c) t[#t+1] = c end)
       x = t
     end
-    moses.map(x, function(i, v)
+    moses.map(x, function(_, v)
       table.insert(r, {e[1], v})
     end)
     return r

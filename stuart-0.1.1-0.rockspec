@@ -1,16 +1,16 @@
 -- This file was automatically generated for the LuaDist project.
 
 package = "stuart"
-version = "0.1.0-1"
+version = "0.1.1-0"
 -- LuaDist source
 source = {
-  tag = "0.1.0-1",
+  tag = "0.1.1-0",
   url = "git://github.com/LuaDist-testing/stuart.git"
 }
 -- Original source
 -- source = {
---    url = "https://github.com/BixData/stuart/archive/0.1.0-1.tar.gz",
---    dir = "stuart-0.1.0-1"
+--    url = "https://github.com/BixData/stuart/archive/0.1.1-0.tar.gz",
+--    dir = "stuart-0.1.1-0"
 -- }
 description = {
    summary = "An Apache Spark runtime for embedding and edge computing",
@@ -48,6 +48,7 @@ build = {
       ["stuart.streaming.SocketInputDStream"] = "src/stuart/streaming/SocketInputDStream.lua",
       ["stuart.streaming.SocketReceiver"] = "src/stuart/streaming/SocketReceiver.lua",
       ["stuart.streaming.StreamingContext"] = "src/stuart/streaming/StreamingContext.lua",
-      ["stuart.streaming.TransformedDStream"] = "src/stuart/streaming/TransformedDStream.lua"
+      ["stuart.streaming.TransformedDStream"] = "src/stuart/streaming/TransformedDStream.lua",
+      ["stuart.util.json"] = "src/stuart/util/json.lua"
    }
 }

@@ -9,10 +9,10 @@ function DStream:initialize(ssc)
 end
 
 function DStream:_notify(validTime, rdd)
-  for i, dstream in ipairs(self.inputs) do
+  for _, dstream in ipairs(self.inputs) do
     rdd = dstream:_notify(validTime, rdd)
   end
-  for i, dstream in ipairs(self.outputs) do
+  for _, dstream in ipairs(self.outputs) do
     dstream:_notify(validTime, rdd)
   end
 end
@@ -29,6 +29,11 @@ function DStream:foreachRDD(foreachFunc)
   local dstream = TransformedDStream:new(self.ssc, foreachFunc)
   self.outputs[#self.outputs+1] = dstream
   return self
+end
+
+function DStream:groupByKey()
+  local transformFunc = function(rdd) return rdd:groupByKey() end
+  return self:transform(transformFunc)
 end
 
 function DStream:mapValues(f)
