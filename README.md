@@ -175,6 +175,7 @@ Used by Stuart to measure time, which is required by the `StreamingContext` coop
 * [lunajson](https://luarocks.org/modules/grafi/lunajson), the pure-Lua JSON parser. If the [cjson](https://luarocks.org/modules/luarocks/lua-cjson) module is detected, it is used first for performance. But otherwise Lunajson is the portable fall-back.
 * [middleclass](https://luarocks.org/modules/kikito/middleclass) to streamline inheritance and allow for literal adaptation of many Apache Spark APIs.
 * [moses](https://luarocks.org/modules/yonaba/moses), the underscore-inspired Lua-optimized workhorse.
+* [net-url](https://luarocks.org/modules/golgote/net-url), a URL and query string parser/builder/normalizer.
 
 ## Compatibility
 
@@ -257,7 +258,7 @@ Testing with `lua-cjson`:
 $ luarocks install busted
 $ luarocks install lua-cjson
 $ busted -v --defer-print
-17/11/12 08:46:51 INFO Running Embedded Spark (Stuart) version 2.2.0 
+17/11/12 08:46:51 INFO Running Stuart (Embedded Spark) version 2.2.0 
 ...
 141 successes / 0 failures / 0 errors / 0 pending : 12.026833 seconds
 ```
@@ -267,7 +268,7 @@ Testing with `lunajson`:
 ```
 $ luarocks remove lua-cjson
 $ busted -v --defer-print
-17/11/12 08:46:51 INFO Running Embedded Spark (Stuart) version 2.2.0 
+17/11/12 08:46:51 INFO Running Stuart (Embedded Spark) version 2.2.0 
 ...
 139 successes / 0 failures / 0 errors / 2 pending : 12.026833 seconds
 
