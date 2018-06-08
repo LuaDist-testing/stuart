@@ -1,17 +1,9 @@
--- This file was automatically generated for the LuaDist project.
-
 package = "stuart"
-version = "0.1.5-2"
--- LuaDist source
+version = "0.1.5-3"
 source = {
-  tag = "0.1.5-2",
-  url = "git://github.com/LuaDist-testing/stuart.git"
+   url = "https://github.com/BixData/stuart/archive/0.1.5-3.tar.gz",
+   dir = "stuart-0.1.5-3"
 }
--- Original source
--- source = {
---    url = "https://github.com/BixData/stuart/archive/0.1.5-2.tar.gz",
---    dir = "stuart-0.1.5-2"
--- }
 description = {
    summary = "An Apache Spark runtime for embedding and edge computing",
    detailed = [[
@@ -24,7 +16,6 @@ description = {
 }
 dependencies = {
    "lua >= 5.1",
-   "luasocket <= 3.0rc1-2",
    "lunajson <= 1.2-0",
    "middleclass <= 4.1-0",
    "moses <= 1.6.1-1",
@@ -46,6 +37,8 @@ build = {
       ["stuart.hadoop.Path"] = "src/stuart/hadoop/Path.lua",
       
       ["stuart.interface.clock"] = "src/stuart/interface/clock.lua",
+      ["stuart.interface.sleep"] = "src/stuart/interface/sleep.lua",
+      
       ["stuart.internal.Logger"] = "src/stuart/internal/Logger.lua",
       ["stuart.internal.logging"] = "src/stuart/internal/logging.lua",
       
