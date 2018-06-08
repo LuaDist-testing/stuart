@@ -1,17 +1,9 @@
--- This file was automatically generated for the LuaDist project.
-
 package = "stuart"
-version = "0.1.1-0"
--- LuaDist source
+version = "0.1.2-0"
 source = {
-  tag = "0.1.1-0",
-  url = "git://github.com/LuaDist-testing/stuart.git"
+   url = "https://github.com/BixData/stuart/archive/0.1.2-0.tar.gz",
+   dir = "stuart-0.1.2-0"
 }
--- Original source
--- source = {
---    url = "https://github.com/BixData/stuart/archive/0.1.1-0.tar.gz",
---    dir = "stuart-0.1.1-0"
--- }
 description = {
    summary = "An Apache Spark runtime for embedding and edge computing",
    detailed = [[
@@ -49,6 +41,8 @@ build = {
       ["stuart.streaming.SocketReceiver"] = "src/stuart/streaming/SocketReceiver.lua",
       ["stuart.streaming.StreamingContext"] = "src/stuart/streaming/StreamingContext.lua",
       ["stuart.streaming.TransformedDStream"] = "src/stuart/streaming/TransformedDStream.lua",
-      ["stuart.util.json"] = "src/stuart/util/json.lua"
+      ["stuart.util.json"] = "src/stuart/util/json.lua",
+      ["stuart.util.spark.randomizeInPlace"] = "src/stuart/util/spark/randomizeInPlace.lua",
+      ["stuart.util.spark.samplingUtils"] = "src/stuart/util/spark/samplingUtils.lua"
    }
 }

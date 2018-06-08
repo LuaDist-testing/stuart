@@ -1,5 +1,7 @@
 local class = require 'middleclass'
 local moses = require 'moses'
+local randomizeInPlace = require 'stuart.util.spark.randomizeInPlace'
+local samplingUtils = require 'stuart.util.spark.samplingUtils'
 
 local RDD = class('RDD')
 
@@ -25,6 +27,10 @@ end
 function RDD:_flattenValues()
   for _, p in ipairs(self.partitions) do p:_flattenValues() end
   return self
+end
+
+function RDD.__tostring(self)
+  return 'RDD[' .. self.id .. ']'
 end
 
 function RDD:aggregate(zeroValue, seqOp, combOp)
@@ -441,6 +447,15 @@ function RDD:rightOuterJoin(other)
   return self.context:parallelize(t)
 end
 
+function RDD:sample(_, fraction, seed)
+  assert(fraction >= 0, 'Fraction must be nonnegative, but got ' .. fraction)
+  local t = self:collect()
+  local n = math.max(1, #t * fraction)
+  if n > #t then return {} end
+  local r = moses.sample(self:collect(), n, seed)
+  return self.context:parallelize(r)
+end
+
 function RDD:setName(name)
   self.name = name
 end
@@ -518,6 +533,14 @@ function RDD:subtractByKey(other)
   return self.context:parallelize(t, #self.partitions)
 end
 
+function RDD:sum()
+  return moses.reduce(self:collect(), function(r, v) return r+v end, 0)
+end
+
+function RDD:sumApprox()
+  return self:sum()
+end
+
 function RDD:take(n)
   local iter = self:toLocalIterator()
   local t = {}
@@ -529,8 +552,28 @@ function RDD:take(n)
   return t
 end
 
-function RDD:takeSample(_, num)
-  return moses.sample(self:collect(), num)
+function RDD:takeSample(withReplacement, num, seed)
+  assert(num >= 0, 'Negative number of elements requested')
+
+  if num == 0 then return {} end
+  local initialCount = self:count()
+  if initialCount == 0 then return {} end
+  
+  if seed ~= nil then math.randomseed(seed) end
+
+  if not withReplacement and num >= initialCount then
+    return randomizeInPlace(self:collect())
+  end
+  
+  local fraction = samplingUtils.computeFractionForSampleSize(num, initialCount, withReplacement)
+  local samples = self:sample(withReplacement, fraction, math.random(32000)):collect()
+
+  -- If the first sample didn't turn out large enough, keep trying to take samples;
+  -- this shouldn't happen often because we use a big multiplier for the initial size
+  while #samples < num do
+    samples = self:sample(withReplacement, fraction, math.random(32000)):collect()
+  end
+  return moses.first(randomizeInPlace(samples), num)
 end
 
 function RDD:toLocalIterator()
@@ -557,6 +600,10 @@ end
 function RDD:top(num)
   local t = moses.sort(self:collect(), function(a,b) return a>b end)
   return moses.slice(t, 1, num)
+end
+
+function RDD:toString()
+  return tostring(self)
 end
 
 function RDD:union(other)
