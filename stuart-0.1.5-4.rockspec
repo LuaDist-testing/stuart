@@ -1,16 +1,16 @@
 -- This file was automatically generated for the LuaDist project.
 
 package = "stuart"
-version = "0.1.5-3"
+version = "0.1.5-4"
 -- LuaDist source
 source = {
-  tag = "0.1.5-3",
+  tag = "0.1.5-4",
   url = "git://github.com/LuaDist-testing/stuart.git"
 }
 -- Original source
 -- source = {
---    url = "https://github.com/BixData/stuart/archive/0.1.5-3.tar.gz",
---    dir = "stuart-0.1.5-3"
+--    url = "https://github.com/BixData/stuart/archive/0.1.5-4.tar.gz",
+--    dir = "stuart-0.1.5-4"
 -- }
 description = {
    summary = "An Apache Spark runtime for embedding and edge computing",
@@ -26,7 +26,6 @@ dependencies = {
    "lua >= 5.1",
    "lunajson <= 1.2-0",
    "middleclass <= 4.1-0",
-   "moses <= 1.6.1-1",
    "net-url <= 0.9-1"
 }
 build = {
@@ -62,6 +61,7 @@ build = {
       
       ["stuart.util.isInstanceOf"] = "src/stuart/util/isInstanceOf.lua",
       ["stuart.util.json"] = "src/stuart/util/json.lua",
+      ["stuart.util.moses"] = "src/stuart/util/moses.lua",
       ["stuart.util.spark.randomizeInPlace"] = "src/stuart/util/spark/randomizeInPlace.lua",
       ["stuart.util.spark.samplingUtils"] = "src/stuart/util/spark/samplingUtils.lua",
       ["stuart.util.split"] = "src/stuart/util/split.lua"
