@@ -1,4 +1,6 @@
 local class = require 'middleclass'
+local clock = require 'stuart.interface.clock'
+local log = require 'stuart.internal.logging'.log
 local socket = require 'socket'
 local socketUrl = require 'socket.url'
 
@@ -21,15 +23,19 @@ end
 
 function HttpReceiver:onStart()
   local parsedUrl = socketUrl.parse(self.url)
-  self.conn = socket.connect(parsedUrl.host, parsedUrl.port)
+  log:info(string.format('Connecting to %s:%d', parsedUrl.host, parsedUrl.port))
+  self.conn, self.err = socket.connect(parsedUrl.host, parsedUrl.port)
   if self.conn ~= nil then
-    -- Connect and send GET request
+    log:info(string.format('Connected to %s:%d', parsedUrl.host, parsedUrl.port))
+    -- send GET request
     local url = parsedUrl.path
     if parsedUrl.query ~= nil then url = url .. '?' .. parsedUrl.query end
     if parsedUrl.fragment ~= nil then url = url .. '#' .. parsedUrl.fragment end
     local header = table.concat(self.requestHeaders, '\r\n')
     --print('GET ' .. url)
     self.conn:send('GET ' .. url .. ' HTTP/1.0\r\n' .. header .. '\r\n\r\n')
+  else
+    log:error(string.format('Error connecting to %s:%d: %s', parsedUrl.host, parsedUrl.port, self.err))
   end
 end
 
@@ -38,16 +44,16 @@ function HttpReceiver:onStop()
 end
 
 function HttpReceiver:run(durationBudget)
-  local timeOfLastYield = socket.gettime()
+  local timeOfLastYield = clock.now()
   local data = {}
   local minWait = 0.02 -- never block less than 20ms
   while true do
-    local elapsed = socket.gettime() - timeOfLastYield
+    local elapsed = clock.now() - timeOfLastYield
     if elapsed > durationBudget then
       local rdd = self.ssc.sc:makeRDD(data)
       coroutine.yield({rdd})
       data = {}
-      timeOfLastYield = socket.gettime()
+      timeOfLastYield = clock.now()
     else
       self.conn:settimeout(math.max(minWait, durationBudget - elapsed))
       if self.mode == 'text' then

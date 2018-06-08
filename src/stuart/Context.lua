@@ -1,22 +1,41 @@
 local class = require 'middleclass'
-local moses = require 'moses'
-
 local fileSystemFactory = require 'stuart.fileSystemFactory'
+local isInstanceOf = require 'stuart.util.isInstanceOf'
+local logging = require 'stuart.internal.logging'
+local moses = require 'moses'
 local Partition = require 'stuart.Partition'
 local RDD = require 'stuart.RDD'
+local SparkConf = require 'stuart.SparkConf'
 
 local Context = class('Context')
+Context.SPARK_VERSION = '2.2.0'
 
-function Context:initialize(master, appName)
-  self.lastRddId = 0
-  self.master = master or 'local[1]'
-  self.appName = appName
+function Context:initialize(arg1, arg2, arg3, arg4)
+  if arg1 == nil and arg2 == nil then
+    self.conf = SparkConf:new()
+  elseif isInstanceOf(arg1, SparkConf) then
+    self.conf = arg1
+  else
+    self.conf = Context._updatedConf(SparkConf:new(), arg1, arg2, arg3, arg4)
+  end
+  
   self.defaultParallelism = 1
+  self.lastRddId = 0
+  self.stopped = false
+  logging.logInfo('Running Embedded Spark (Stuart) version ' .. Context.SPARK_VERSION)
+end
+
+function Context:appName()
+  return self.conf:get('spark.app.name')
 end
 
 function Context:emptyRDD()
   local rdd = self:parallelize({}, 0)
   return rdd
+end
+
+function Context:getConf()
+  return self.conf:clone()
 end
 
 function Context:getNextId()
@@ -34,11 +53,20 @@ function Context:hadoopFile(path, minPartitions)
   return self:parallelize(lines, minPartitions)
 end
 
+function Context:isStopped()
+  return self.stopped
+end
+
 function Context:makeRDD(x, numPartitions)
   return self:parallelize(x, numPartitions)
 end
 
+function Context:master()
+  return self.conf:get('spark.master')
+end
+
 function Context:parallelize(x, numPartitions)
+  assert(not self.stopped)
   if not moses.isNumber(numPartitions) then numPartitions = self.defaultParallelism end
   if numPartitions == 1 then
     local p = Partition:new(x, 0)
@@ -57,7 +85,16 @@ function Context:parallelize(x, numPartitions)
 	return RDD:new(self, partitions)
 end
 
+function Context:setLogLevel(level)
+  logging.log:setLevel(level)
+end
+
+function Context:stop()
+  self.stopped = true
+end
+
 function Context:textFile(path, minPartitions)
+  assert(not self.stopped)
   return self:hadoopFile(path, minPartitions)
 end
 
@@ -65,6 +102,16 @@ function Context:union(rdds)
   local t = rdds[1]
   for i = 2, #rdds do t = t:union(rdds[i]) end
   return t
+end
+
+function Context._updatedConf(conf, master, appName, sparkHome)
+  local res = conf:clone()
+  res:setMaster(master)
+  res:setAppName(appName)
+  if sparkHome ~= nil then
+    res:setSparkHome(sparkHome)
+  end
+  return res
 end
 
 return Context

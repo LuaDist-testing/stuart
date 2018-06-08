@@ -1,17 +1,9 @@
--- This file was automatically generated for the LuaDist project.
-
 package = "stuart"
-version = "0.1.3-0"
--- LuaDist source
+version = "0.1.4-0"
 source = {
-  tag = "0.1.3-0",
-  url = "git://github.com/LuaDist-testing/stuart.git"
+   url = "https://github.com/BixData/stuart/archive/0.1.4-0.tar.gz",
+   dir = "stuart-0.1.4-0"
 }
--- Original source
--- source = {
---    url = "https://github.com/BixData/stuart/archive/0.1.3-0.tar.gz",
---    dir = "stuart-0.1.3-0"
--- }
 description = {
    summary = "An Apache Spark runtime for embedding and edge computing",
    detailed = [[
@@ -38,8 +30,12 @@ build = {
       ["stuart.LocalFileSystem"] = "src/stuart/LocalFileSystem.lua",
       ["stuart.Partition"] = "src/stuart/Partition.lua",
       ["stuart.RDD"] = "src/stuart/RDD.lua",
+      ["stuart.SparkConf"] = "src/stuart/SparkConf.lua",
       ["stuart.WebHdfsFileSystem"] = "src/stuart/WebHdfsFileSystem.lua",
       ["stuart.fileSystemFactory"] = "src/stuart/fileSystemFactory.lua",
+      ["stuart.interface.clock"] = "src/stuart/interface/clock.lua",
+      ["stuart.internal.Logger"] = "src/stuart/internal/Logger.lua",
+      ["stuart.internal.logging"] = "src/stuart/internal/logging.lua",
       ["stuart.streaming.DStream"] = "src/stuart/streaming/DStream.lua",
       ["stuart.streaming.HttpReceiver"] = "src/stuart/streaming/HttpReceiver.lua",
       ["stuart.streaming.QueueInputDStream"] = "src/stuart/streaming/QueueInputDStream.lua",
@@ -49,6 +45,7 @@ build = {
       ["stuart.streaming.SocketReceiver"] = "src/stuart/streaming/SocketReceiver.lua",
       ["stuart.streaming.StreamingContext"] = "src/stuart/streaming/StreamingContext.lua",
       ["stuart.streaming.TransformedDStream"] = "src/stuart/streaming/TransformedDStream.lua",
+      ["stuart.util.isInstanceOf"] = "src/stuart/util/isInstanceOf.lua",
       ["stuart.util.json"] = "src/stuart/util/json.lua",
       ["stuart.util.spark.randomizeInPlace"] = "src/stuart/util/spark/randomizeInPlace.lua",
       ["stuart.util.spark.samplingUtils"] = "src/stuart/util/spark/samplingUtils.lua"

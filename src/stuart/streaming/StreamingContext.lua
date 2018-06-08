@@ -1,4 +1,6 @@
 local class = require 'middleclass'
+local clock = require 'stuart.interface.clock'
+local isInstanceOf = require 'stuart.util.isInstanceOf'
 local moses = require 'moses'
 local socket = require 'socket'
 
@@ -11,11 +13,6 @@ local function sleep(timeout)
   socket.select(nil, nil, timeout)
 end
 
-local function isInstanceOf(x, aClass)
-  if not moses.has(x, 'isInstanceOf') then return false end
-  return x:isInstanceOf(aClass)
-end
-
 -------------------------------------------------------------------------------
 
 local StreamingContext = class('StreamingContext')
@@ -25,6 +22,8 @@ function StreamingContext:initialize(sc, batchDuration)
   self.batchDuration = batchDuration or 1
   self.dstreams={}
   self.state='initialized'
+  getmetatable(self).conf = sc.conf
+  getmetatable(self).sparkContext = sc
 end
 
 function StreamingContext:awaitTermination()
@@ -40,13 +39,13 @@ function StreamingContext:awaitTerminationOrTimeout(timeout)
   end
   
   -- run loop
-  local startTime = socket.gettime()
+  local startTime = clock.now()
   local loopDurationGoal = self.batchDuration
   local individualDStreamDurationBudget = loopDurationGoal / #self.dstreams
   while self.state == 'active' do
   
     -- Decide whether to timeout
-    local now = socket.gettime()
+    local now = clock.now()
     if timeout > 0 then
       local elapsed = now - startTime
       if elapsed > timeout then break end
@@ -104,11 +103,15 @@ function StreamingContext:start()
   self.state = 'active'
 end
 
-function StreamingContext:stop()
+function StreamingContext:stop(stopSparkContext)
+  if stopSparkContext == nil then
+    stopSparkContext = self.conf:getBoolean('spark.streaming.stopSparkContextByDefault', true)
+  end
   for _, dstream in ipairs(self.dstreams) do
     dstream:stop()
   end
   self.state = 'stopped'
+  if stopSparkContext then self.sc:stop() end
 end
 
 return StreamingContext
